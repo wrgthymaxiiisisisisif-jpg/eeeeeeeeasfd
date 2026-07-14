@@ -4,682 +4,599 @@ Library.__index = Library
 
 local UIS = game:GetService("UserInputService")
 local ACCENT_COLOR = Color3.fromRGB(0, 214, 255)
-local TAB_SELECTED_COLOR = Color3.fromRGB(30, 30, 30)   -- same as Group
-local TAB_DEFAULT_COLOR  = Color3.fromRGB(24, 24, 24)
+local TAB_SELECTED_COLOR = Color3.fromRGB(30, 30, 30)
+local TAB_DEFAULT_COLOR  = Color3.fromRGB(30, 30, 30)
 
--- ============================================================
--- WINDOW
--- ============================================================
 function Library:CreateWindow(title)
-    local win = {}
-
-    local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "KiciaLib"
-    ScreenGui.ResetOnSpawn = false
-    ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-    ScreenGui.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
-
-    local Main = Instance.new("Frame", ScreenGui)
-    Main.Name = "Main"
-    Main.Size = UDim2.new(0, 400, 0, 437)
-    Main.Position = UDim2.new(0.34232, 0, 0.14576, 0)
-    Main.BackgroundColor3 = Color3.fromRGB(32, 32, 32)
-    Main.BorderSizePixel = 0
-
-    local MainStroke = Instance.new("UIStroke", Main)
-    MainStroke.Thickness = 0.51
-    MainStroke.Color = ACCENT_COLOR
-    MainStroke.LineJoinMode = Enum.LineJoinMode.Miter
-    MainStroke.Name = "MainUIStroke"
-
-    -- Title label
-    local TitleLabel = Instance.new("TextLabel", Main)
-    TitleLabel.Name = "TitleLabel"
-    TitleLabel.Size = UDim2.new(0, 84, 0, 21)
-    TitleLabel.Position = UDim2.new(0.02503, 0, 0, 0)
-    TitleLabel.BackgroundTransparency = 1
-    TitleLabel.Text = title
-    TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    TitleLabel.TextSize = 12
-    TitleLabel.FontFace = Font.new([[rbxasset://fonts/families/Arial.json]])
-    TitleLabel.ZIndex = 998
-
-    -- Drag bar
-    local DragBar = Instance.new("Frame", Main)
-    DragBar.Name = "DragBar"
-    DragBar.Size = UDim2.new(1, 0, 0, 22)
-    DragBar.Position = UDim2.new(0, 0, 0, 0)
-    DragBar.BackgroundTransparency = 1
-    DragBar.ZIndex = 999
-
-    local dragging, dragStart, frameStart = false, nil, nil
-    DragBar.InputBegan:Connect(function(input)
+    local G2L = {}
+    
+    -- ScreenGui
+    G2L["1"] = Instance.new("ScreenGui", game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui"))
+    G2L["1"]["Name"] = "kiciav2uiexample"
+    G2L["1"]["ZIndexBehavior"] = Enum.ZIndexBehavior.Sibling
+    
+    -- Main
+    G2L["2"] = Instance.new("Frame", G2L["1"])
+    G2L["2"]["BorderSizePixel"] = 0
+    G2L["2"]["BackgroundColor3"] = Color3.fromRGB(32, 32, 32)
+    G2L["2"]["Size"] = UDim2.new(0, 400, 0, 437)
+    G2L["2"]["Position"] = UDim2.new(0.34232, 0, 0.14576, 0)
+    G2L["2"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+    G2L["2"]["Name"] = "Main"
+    
+    -- MainUIStroke
+    G2L["38"] = Instance.new("UIStroke", G2L["2"])
+    G2L["38"]["Thickness"] = 0.51
+    G2L["38"]["Color"] = Color3.fromRGB(0, 214, 255)
+    G2L["38"]["LineJoinMode"] = Enum.LineJoinMode.Miter
+    G2L["38"]["Name"] = "MainUIStroke"
+    
+    -- MainUINameUI
+    G2L["39"] = Instance.new("TextLabel", G2L["2"])
+    G2L["39"]["BorderSizePixel"] = 0
+    G2L["39"]["TextSize"] = 12
+    G2L["39"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
+    G2L["39"]["FontFace"] = Font.new("rbxasset://fonts/families/Arial.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+    G2L["39"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
+    G2L["39"]["BackgroundTransparency"] = 1
+    G2L["39"]["Size"] = UDim2.new(0, 84, 0, 21)
+    G2L["39"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+    G2L["39"]["Text"] = title
+    G2L["39"]["Name"] = "MainUINameUI"
+    G2L["39"]["Position"] = UDim2.new(0.02503, 0, 0, 0)
+    
+    -- Drag functionality
+    local dragging, dragStart, startPos = false, nil, nil
+    G2L["39"].InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging   = true
-            dragStart  = input.Position
-            frameStart = Main.Position
+            dragging = true
+            dragStart = input.Position
+            startPos = G2L["2"].Position
         end
     end)
+    
     UIS.InputChanged:Connect(function(input)
         if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-            local d = input.Position - dragStart
-            Main.Position = UDim2.new(
-                frameStart.X.Scale, frameStart.X.Offset + d.X,
-                frameStart.Y.Scale, frameStart.Y.Offset + d.Y
+            local delta = input.Position - dragStart
+            G2L["2"].Position = UDim2.new(
+                startPos.X.Scale,
+                startPos.X.Offset + delta.X,
+                startPos.Y.Scale,
+                startPos.Y.Offset + delta.Y
             )
         end
     end)
+    
     UIS.InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = false
         end
     end)
-
-    -- Group (tab bar + content)
-    local Group = Instance.new("Frame", Main)
-    Group.Name = "Group"
-    Group.Size = UDim2.new(0, 379, 0, 400)
-    Group.Position = UDim2.new(0.02503, 0, 0.05361, 0)
-    Group.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    Group.BorderSizePixel = 0
-    local gS1 = Instance.new("UIStroke", Group)
-    gS1.Name = "GroupUIStroke1"
-    local gS2 = Instance.new("UIStroke", Group)
-    gS2.Thickness = 2; gS2.Color = Color3.fromRGB(58,58,58); gS2.ZIndex = 0
-
-    -- Tab bar container
-    local TabBar = Instance.new("Frame", Group)
-    TabBar.Name = "TabBar"
-    TabBar.Size = UDim2.new(1, 0, 0, 20)
-    TabBar.Position = UDim2.new(0, 0, 0.02, 0)
-    TabBar.BackgroundTransparency = 1
-    TabBar.BorderSizePixel = 0
-
-    local TabBarLayout = Instance.new("UIListLayout", TabBar)
-    TabBarLayout.FillDirection = Enum.FillDirection.Horizontal
-    TabBarLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    TabBarLayout.Padding = UDim.new(0, 4)
-
-    -- Content area (holds GroupBoxes)
-    local ContentArea = Instance.new("Frame", Group)
-    ContentArea.Name = "ContentArea"
-    ContentArea.Size = UDim2.new(0, 357, 0, 358)
-    ContentArea.Position = UDim2.new(0.02739, 0, 0.07122, 0)
-    ContentArea.BackgroundColor3 = Color3.fromRGB(39, 39, 39)
-    ContentArea.BorderSizePixel = 0
-    ContentArea.ClipsDescendants = false
-    local caS1 = Instance.new("UIStroke", ContentArea)
-    caS1.Thickness = 2; caS1.Color = Color3.fromRGB(58,58,58); caS1.ZIndex = 0
-
-    win._Main        = Main
-    win._Group       = Group
-    win._TabBar      = TabBar
-    win._ContentArea = ContentArea
-    win._tabs        = {}
-    win._tabFrames   = {}
-    win._tabOrder    = 0
-    win._activeTab   = nil
-
-    setmetatable(win, {__index = WindowMethods})
-    return win
-end
-
--- ============================================================
--- WINDOW METHODS
--- ============================================================
-WindowMethods = {}
-WindowMethods.__index = WindowMethods
-
-function WindowMethods:AddTab(name)
-    local tab = {}
-    self._tabOrder = self._tabOrder + 1
-    local order = self._tabOrder
-
-    -- Tab button frame
-    local TabFrame = Instance.new("Frame", self._TabBar)
-    TabFrame.Name = "Tab_" .. name
-    TabFrame.Size = UDim2.new(0, 90, 1, 0)
-    TabFrame.BackgroundColor3 = TAB_DEFAULT_COLOR
-    TabFrame.BorderSizePixel = 0
-    TabFrame.LayoutOrder = order
-
-    local tS1 = Instance.new("UIStroke", TabFrame)
-    tS1.ZIndex = 0; tS1.Thickness = 2; tS1.LineJoinMode = Enum.LineJoinMode.Miter
-    local tS2 = Instance.new("UIStroke", TabFrame)
-    tS2.ZIndex = 2; tS2.Color = Color3.fromRGB(64,64,64); tS2.LineJoinMode = Enum.LineJoinMode.Miter
-
-    local TabLabel = Instance.new("TextLabel", TabFrame)
-    TabLabel.BackgroundTransparency = 1
-    TabLabel.Size = UDim2.new(1, 0, 1, 0)
-    TabLabel.Text = name
-    TabLabel.TextSize = 12
-    TabLabel.TextColor3 = Color3.fromRGB(255,255,255)
-    TabLabel.FontFace = Font.new([[rbxasset://fonts/families/Arial.json]])
-
-    -- Content frame for this tab
-    local TabContent = Instance.new("Frame", self._ContentArea)
-    TabContent.Name = "TabContent_" .. name
-    TabContent.Size = UDim2.new(1, 0, 1, 0)
-    TabContent.BackgroundTransparency = 1
-    TabContent.BorderSizePixel = 0
-    TabContent.Visible = false
-
-    -- Invisible button to detect clicks
-    local TabBtn = Instance.new("TextButton", TabFrame)
-    TabBtn.Size = UDim2.new(1,0,1,0)
-    TabBtn.BackgroundTransparency = 1
-    TabBtn.Text = ""
-    TabBtn.ZIndex = 10
-
-    -- Click logic
-    local allTabs    = self._tabs
-    local allFrames  = self._tabFrames
-
-    TabBtn.MouseButton1Click:Connect(function()
-        -- hide all tabs
-        for _, t in ipairs(allTabs) do
-            t._Content.Visible = false
-            t._Frame.BackgroundColor3 = TAB_DEFAULT_COLOR
-        end
-        -- show this tab
-        TabContent.Visible = true
-        TabFrame.BackgroundColor3 = TAB_SELECTED_COLOR
-        self._activeTab = tab
-        print("Tab selected: " .. name)
-    end)
-
-    tab._Frame   = TabFrame
-    tab._Content = TabContent
-    tab._name    = name
-    tab._win     = self
-
-    -- Left groupbox column x offset tracker
-    tab._gbLeft  = 0
-    tab._gbRight = 0
-
-    table.insert(self._tabs, tab)
-    table.insert(self._tabFrames, TabFrame)
-
-    -- Auto-select first tab
-    if #self._tabs == 1 then
-        TabContent.Visible = true
-        TabFrame.BackgroundColor3 = TAB_SELECTED_COLOR
-        self._activeTab = tab
+    
+    -- Group
+    G2L["3"] = Instance.new("Frame", G2L["2"])
+    G2L["3"]["BorderSizePixel"] = 0
+    G2L["3"]["BackgroundColor3"] = Color3.fromRGB(30, 30, 30)
+    G2L["3"]["Size"] = UDim2.new(0, 379, 0, 400)
+    G2L["3"]["Position"] = UDim2.new(0.02503, 0, 0.05361, 0)
+    G2L["3"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+    G2L["3"]["Name"] = "Group"
+    
+    G2L["4"] = Instance.new("UIStroke", G2L["3"])
+    G2L["4"]["Name"] = "GroupUIStroke1"
+    
+    G2L["5"] = Instance.new("UIStroke", G2L["3"])
+    G2L["5"]["ZIndex"] = 0
+    G2L["5"]["Thickness"] = 2
+    G2L["5"]["Color"] = Color3.fromRGB(58, 58, 58)
+    G2L["5"]["Name"] = "GroupUIStroke2"
+    
+    -- Tab1
+    G2L["2c"] = Instance.new("Frame", G2L["3"])
+    G2L["2c"]["BorderSizePixel"] = 0
+    G2L["2c"]["BackgroundColor3"] = Color3.fromRGB(30, 30, 30)
+    G2L["2c"]["Size"] = UDim2.new(0, 90, 0, 20)
+    G2L["2c"]["Position"] = UDim2.new(0.02639, 0, 0.02, 0)
+    G2L["2c"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+    G2L["2c"]["Name"] = "Tab1"
+    
+    G2L["2d"] = Instance.new("UIStroke", G2L["2c"])
+    G2L["2d"]["ZIndex"] = 0
+    G2L["2d"]["Thickness"] = 2
+    G2L["2d"]["LineJoinMode"] = Enum.LineJoinMode.Miter
+    
+    G2L["2e"] = Instance.new("UIStroke", G2L["2c"])
+    G2L["2e"]["ZIndex"] = 2
+    G2L["2e"]["Color"] = Color3.fromRGB(64, 64, 64)
+    G2L["2e"]["LineJoinMode"] = Enum.LineJoinMode.Miter
+    
+    G2L["2f"] = Instance.new("TextLabel", G2L["2c"])
+    G2L["2f"]["BorderSizePixel"] = 0
+    G2L["2f"]["TextSize"] = 12
+    G2L["2f"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
+    G2L["2f"]["FontFace"] = Font.new("rbxasset://fonts/families/Arial.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+    G2L["2f"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
+    G2L["2f"]["BackgroundTransparency"] = 1
+    G2L["2f"]["Size"] = UDim2.new(0, 50, 0, 13)
+    G2L["2f"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+    G2L["2f"]["Text"] = "Main"
+    G2L["2f"]["Position"] = UDim2.new(0.21772, 0, 0.15, 0)
+    
+    -- Tab2
+    G2L["30"] = Instance.new("Frame", G2L["3"])
+    G2L["30"]["BorderSizePixel"] = 0
+    G2L["30"]["BackgroundColor3"] = Color3.fromRGB(30, 30, 30)
+    G2L["30"]["Size"] = UDim2.new(0, 90, 0, 20)
+    G2L["30"]["Position"] = UDim2.new(0.28496, 0, 0.02, 0)
+    G2L["30"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+    G2L["30"]["Name"] = "Tab2"
+    
+    G2L["31"] = Instance.new("TextLabel", G2L["30"])
+    G2L["31"]["BorderSizePixel"] = 0
+    G2L["31"]["TextSize"] = 12
+    G2L["31"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
+    G2L["31"]["FontFace"] = Font.new("rbxasset://fonts/families/Arial.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+    G2L["31"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
+    G2L["31"]["BackgroundTransparency"] = 1
+    G2L["31"]["Size"] = UDim2.new(0, 50, 0, 13)
+    G2L["31"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+    G2L["31"]["Text"] = "Visuals"
+    G2L["31"]["Position"] = UDim2.new(0.21772, 0, 0.15, 0)
+    
+    G2L["32"] = Instance.new("UIStroke", G2L["30"])
+    G2L["32"]["ZIndex"] = 2
+    G2L["32"]["Color"] = Color3.fromRGB(64, 64, 64)
+    G2L["32"]["LineJoinMode"] = Enum.LineJoinMode.Miter
+    
+    G2L["33"] = Instance.new("UIStroke", G2L["30"])
+    G2L["33"]["ZIndex"] = 0
+    G2L["33"]["Thickness"] = 2
+    G2L["33"]["LineJoinMode"] = Enum.LineJoinMode.Miter
+    
+    -- Tab3
+    G2L["34"] = Instance.new("Frame", G2L["3"])
+    G2L["34"]["BorderSizePixel"] = 0
+    G2L["34"]["BackgroundColor3"] = Color3.fromRGB(30, 30, 30)
+    G2L["34"]["Size"] = UDim2.new(0, 90, 0, 20)
+    G2L["34"]["Position"] = UDim2.new(0.5409, 0, 0.02, 0)
+    G2L["34"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+    G2L["34"]["Name"] = "Tab3"
+    
+    G2L["35"] = Instance.new("UIStroke", G2L["34"])
+    G2L["35"]["ZIndex"] = 2
+    G2L["35"]["Color"] = Color3.fromRGB(64, 64, 64)
+    G2L["35"]["LineJoinMode"] = Enum.LineJoinMode.Miter
+    
+    G2L["36"] = Instance.new("TextLabel", G2L["34"])
+    G2L["36"]["BorderSizePixel"] = 0
+    G2L["36"]["TextSize"] = 12
+    G2L["36"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
+    G2L["36"]["FontFace"] = Font.new("rbxasset://fonts/families/Arial.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+    G2L["36"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
+    G2L["36"]["BackgroundTransparency"] = 1
+    G2L["36"]["Size"] = UDim2.new(0, 50, 0, 13)
+    G2L["36"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+    G2L["36"]["Text"] = "Misc"
+    G2L["36"]["Position"] = UDim2.new(0.21772, 0, 0.15, 0)
+    
+    G2L["37"] = Instance.new("UIStroke", G2L["34"])
+    G2L["37"]["ZIndex"] = 0
+    G2L["37"]["Thickness"] = 2
+    G2L["37"]["LineJoinMode"] = Enum.LineJoinMode.Miter
+    
+    -- Tab selection logic
+    local tabs = {G2L["2c"], G2L["30"], G2L["34"]}
+    for _, tab in ipairs(tabs) do
+        local btn = Instance.new("TextButton", tab)
+        btn.Size = UDim2.new(1, 0, 1, 0)
+        btn.BackgroundTransparency = 1
+        btn.Text = ""
+        btn.ZIndex = 10
+        btn.MouseButton1Click:Connect(function()
+            for _, t in ipairs(tabs) do
+                t.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+            end
+            tab.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+            print("Tab selected:", tab:FindFirstChildOfClass("TextLabel").Text)
+        end)
     end
-
-    setmetatable(tab, {__index = TabMethods})
-    return tab
-end
-
--- ============================================================
--- TAB METHODS
--- ============================================================
-TabMethods = {}
-TabMethods.__index = TabMethods
-
-function TabMethods:AddGroupbox(name, side)
-    -- side: "left" or "right"
-    side = side or "left"
-
-    local gb = {}
-
-    local GBWidth  = 155
-    local GBStartY = 9
-    local padding  = 9
-
-    local xOffset
-    if side == "left" then
-        xOffset = 9
-        self._gbLeftY = self._gbLeftY or GBStartY
-    else
-        xOffset = 9 + GBWidth + padding
-        self._gbRightY = self._gbRightY or GBStartY
-    end
-
-    local currentY = (side == "left") and self._gbLeftY or self._gbRightY
-
-    local GBFrame = Instance.new("Frame", self._Content)
-    GBFrame.Name = "GroupBox_" .. name
-    GBFrame.Size = UDim2.new(0, GBWidth, 0, 40) -- starts small, auto grows
-    GBFrame.Position = UDim2.new(0, xOffset, 0, currentY)
-    GBFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    GBFrame.BorderSizePixel = 0
-    GBFrame.ClipsDescendants = false
-
-    local gbS1 = Instance.new("UIStroke", GBFrame)
-    gbS1.ZIndex = 0; gbS1.Thickness = 2; gbS1.Color = Color3.fromRGB(21,21,21)
-    gbS1.LineJoinMode = Enum.LineJoinMode.Miter
-    local gbS2 = Instance.new("UIStroke", GBFrame)
-    gbS2.Color = Color3.fromRGB(57,57,57); gbS2.LineJoinMode = Enum.LineJoinMode.Miter
-
-    -- Top color bar
-    local TopBar = Instance.new("Frame", GBFrame)
-    TopBar.Name = "TopBar"
-    TopBar.Size = UDim2.new(1, -4, 0, 2)
-    TopBar.Position = UDim2.new(0, 2, 0, 0)
-    TopBar.BackgroundColor3 = ACCENT_COLOR
-    TopBar.BorderSizePixel = 0
-
-    -- Title
-    local GBTitle = Instance.new("TextLabel", GBFrame)
-    GBTitle.Name = "GBTitle"
-    GBTitle.BackgroundTransparency = 1
-    GBTitle.Size = UDim2.new(1, 0, 0, 20)
-    GBTitle.Position = UDim2.new(0, 4, 0, 2)
-    GBTitle.Text = name
-    GBTitle.TextSize = 12
-    GBTitle.TextColor3 = Color3.fromRGB(255,255,255)
-    GBTitle.FontFace = Font.new([[rbxasset://fonts/families/Arial.json]])
-    GBTitle.TextXAlignment = Enum.TextXAlignment.Center
-
-    -- Item container (auto layout)
-    local ItemList = Instance.new("Frame", GBFrame)
-    ItemList.Name = "ItemList"
-    ItemList.BackgroundTransparency = 1
-    ItemList.BorderSizePixel = 0
-    ItemList.Size = UDim2.new(1, 0, 0, 0)
-    ItemList.Position = UDim2.new(0, 0, 0, 24)
-    ItemList.AutomaticSize = Enum.AutomaticSize.Y
-
-    local ItemLayout = Instance.new("UIListLayout", ItemList)
-    ItemLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    ItemLayout.Padding = UDim.new(0, 4)
-    local ItemPadding = Instance.new("UIPadding", ItemList)
-    ItemPadding.PaddingLeft   = UDim.new(0, 8)
-    ItemPadding.PaddingRight  = UDim.new(0, 8)
-    ItemPadding.PaddingBottom = UDim.new(0, 6)
-
-    -- Auto resize groupbox height
-    local function resizeGB()
-        local h = ItemList.AbsoluteSize.Y + 30
-        GBFrame.Size = UDim2.new(0, GBWidth, 0, h)
-    end
-    ItemLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(resizeGB)
-
-    gb._Frame    = GBFrame
-    gb._ItemList = ItemList
-    gb._ItemOrder = 0
-    gb._side     = side
-    gb._tab      = self
-
-    setmetatable(gb, {__index = GroupboxMethods})
-    return gb
-end
-
--- ============================================================
--- GROUPBOX METHODS
--- ============================================================
-GroupboxMethods = {}
-GroupboxMethods.__index = GroupboxMethods
-
-local function makeItemRow(parent, order)
-    local row = Instance.new("Frame", parent)
-    row.BackgroundTransparency = 1
-    row.BorderSizePixel = 0
-    row.Size = UDim2.new(1, 0, 0, 20)
-    row.LayoutOrder = order
-    row.Name = "Row_" .. order
-    return row
-end
-
--- TOGGLE
-function GroupboxMethods:AddToggle(name, default, callback)
-    self._ItemOrder = self._ItemOrder + 1
-    local order = self._ItemOrder
-    local state = default or false
-
-    local Row = makeItemRow(self._ItemList, order)
-
-    -- Box
-    local Box = Instance.new("Frame", Row)
-    Box.Size = UDim2.new(0, 12, 0, 12)
-    Box.Position = UDim2.new(0, 0, 0.5, -6)
-    Box.BackgroundColor3 = state and ACCENT_COLOR or Color3.fromRGB(39,39,39)
-    Box.BorderSizePixel = 0
-
-    local bS1 = Instance.new("UIStroke", Box)
-    bS1.Thickness = 1.6; bS1.LineJoinMode = Enum.LineJoinMode.Miter
-    local bS2 = Instance.new("UIStroke", Box)
-    bS2.Color = Color3.fromRGB(64,64,64); bS2.LineJoinMode = Enum.LineJoinMode.Miter
-
-    -- Label
-    local Lbl = Instance.new("TextLabel", Row)
-    Lbl.BackgroundTransparency = 1
-    Lbl.Size = UDim2.new(1, -18, 1, 0)
-    Lbl.Position = UDim2.new(0, 18, 0, 0)
-    Lbl.Text = name
-    Lbl.TextSize = 12
-    Lbl.TextColor3 = Color3.fromRGB(255,255,255)
-    Lbl.FontFace = Font.new([[rbxasset://fonts/families/Arial.json]])
-    Lbl.TextXAlignment = Enum.TextXAlignment.Left
-
-    -- Button
-    local Btn = Instance.new("TextButton", Row)
-    Btn.Size = UDim2.new(1,0,1,0)
-    Btn.BackgroundTransparency = 1
-    Btn.Text = ""
-    Btn.ZIndex = 10
-    Btn.AutoButtonColor = false
-
-    Btn.MouseButton1Click:Connect(function()
-        state = not state
-        Box.BackgroundColor3 = state and ACCENT_COLOR or Color3.fromRGB(39,39,39)
-        print(name .. " Toggle: " .. tostring(state))
-        if callback then callback(state) end
+    
+    -- MainGroupBoxes
+    G2L["6"] = Instance.new("Frame", G2L["3"])
+    G2L["6"]["ZIndex"] = 999999999
+    G2L["6"]["BorderSizePixel"] = 0
+    G2L["6"]["BackgroundColor3"] = Color3.fromRGB(39, 39, 39)
+    G2L["6"]["Size"] = UDim2.new(0, 357, 0, 358)
+    G2L["6"]["Position"] = UDim2.new(0.02739, 0, 0.07122, 0)
+    G2L["6"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+    G2L["6"]["Name"] = "MainGroupBoxes"
+    
+    G2L["7"] = Instance.new("UIStroke", G2L["6"])
+    G2L["7"]["ZIndex"] = 3123
+    G2L["7"]["Name"] = "MainGroupBoxesUIStroke1"
+    
+    G2L["8"] = Instance.new("UIStroke", G2L["6"])
+    G2L["8"]["ZIndex"] = 0
+    G2L["8"]["Thickness"] = 2
+    G2L["8"]["Color"] = Color3.fromRGB(58, 58, 58)
+    G2L["8"]["Name"] = "MainGroupBoxesUIStroke2"
+    
+    -- GroupBox1
+    G2L["9"] = Instance.new("Frame", G2L["6"])
+    G2L["9"]["BorderSizePixel"] = 0
+    G2L["9"]["BackgroundColor3"] = Color3.fromRGB(30, 30, 30)
+    G2L["9"]["Size"] = UDim2.new(0, 155, 0, 111)
+    G2L["9"]["Position"] = UDim2.new(0.02609, 0, 0.04852, 0)
+    G2L["9"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+    G2L["9"]["Name"] = "GroupBox1"
+    
+    G2L["a"] = Instance.new("UIStroke", G2L["9"])
+    G2L["a"]["ZIndex"] = 0
+    G2L["a"]["Thickness"] = 2
+    G2L["a"]["Color"] = Color3.fromRGB(21, 21, 21)
+    G2L["a"]["LineJoinMode"] = Enum.LineJoinMode.Miter
+    G2L["a"]["Name"] = "GroupBox1UIStroke"
+    
+    G2L["b"] = Instance.new("Frame", G2L["9"])
+    G2L["b"]["BorderSizePixel"] = 0
+    G2L["b"]["BackgroundColor3"] = Color3.fromRGB(0, 194, 228)
+    G2L["b"]["Size"] = UDim2.new(0, 152, 0, 2)
+    G2L["b"]["Position"] = UDim2.new(0.01318, 0, 0, 0)
+    G2L["b"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+    G2L["b"]["Name"] = "GroupBoxTop"
+    
+    G2L["c"] = Instance.new("TextLabel", G2L["9"])
+    G2L["c"]["BorderSizePixel"] = 0
+    G2L["c"]["TextSize"] = 12
+    G2L["c"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
+    G2L["c"]["FontFace"] = Font.new("rbxasset://fonts/families/Arial.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+    G2L["c"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
+    G2L["c"]["BackgroundTransparency"] = 1
+    G2L["c"]["Size"] = UDim2.new(0, 86, 0, 22)
+    G2L["c"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+    G2L["c"]["Text"] = "groupbox"
+    G2L["c"]["Name"] = "GroupBox1Text"
+    G2L["c"]["Position"] = UDim2.new(0.21862, 0, 0.01802, 0)
+    
+    G2L["d"] = Instance.new("UIStroke", G2L["9"])
+    G2L["d"]["Color"] = Color3.fromRGB(57, 57, 57)
+    G2L["d"]["LineJoinMode"] = Enum.LineJoinMode.Miter
+    G2L["d"]["Name"] = "GroupBox1UIStroke2"
+    
+    -- Toggle
+    local toggleState = false
+    G2L["e"] = Instance.new("Frame", G2L["9"])
+    G2L["e"]["BorderSizePixel"] = 0
+    G2L["e"]["BackgroundColor3"] = Color3.fromRGB(39, 39, 39)
+    G2L["e"]["Size"] = UDim2.new(0, 12, 0, 12)
+    G2L["e"]["Position"] = UDim2.new(0.10323, 0, 0.30631, 0)
+    G2L["e"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+    G2L["e"]["Name"] = "Toggle"
+    
+    G2L["f"] = Instance.new("UIStroke", G2L["e"])
+    G2L["f"]["ZIndex"] = 0
+    G2L["f"]["Thickness"] = 1.6
+    G2L["f"]["LineJoinMode"] = Enum.LineJoinMode.Miter
+    
+    G2L["10"] = Instance.new("UIStroke", G2L["e"])
+    G2L["10"]["Color"] = Color3.fromRGB(64, 64, 64)
+    G2L["10"]["LineJoinMode"] = Enum.LineJoinMode.Miter
+    
+    G2L["11"] = Instance.new("TextLabel", G2L["e"])
+    G2L["11"]["BorderSizePixel"] = 0
+    G2L["11"]["TextSize"] = 12
+    G2L["11"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
+    G2L["11"]["FontFace"] = Font.new("rbxasset://fonts/families/Arial.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+    G2L["11"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
+    G2L["11"]["BackgroundTransparency"] = 1
+    G2L["11"]["Size"] = UDim2.new(0, 45, 0, 18)
+    G2L["11"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+    G2L["11"]["Text"] = "Toggle"
+    G2L["11"]["Position"] = UDim2.new(0.96666, 0, -0.3, 0)
+    
+    local toggleBtn = Instance.new("TextButton", G2L["e"])
+    toggleBtn.Size = UDim2.new(1, 0, 1, 0)
+    toggleBtn.BackgroundTransparency = 1
+    toggleBtn.Text = ""
+    toggleBtn.ZIndex = 10
+    toggleBtn.MouseButton1Click:Connect(function()
+        toggleState = not toggleState
+        G2L["e"].BackgroundColor3 = toggleState and ACCENT_COLOR or Color3.fromRGB(39, 39, 39)
+        print("Toggle:", toggleState)
     end)
-
-    return {
-        GetValue = function() return state end,
-        SetValue = function(v)
-            state = v
-            Box.BackgroundColor3 = state and ACCENT_COLOR or Color3.fromRGB(39,39,39)
-            if callback then callback(state) end
-        end
-    }
-end
-
--- BUTTON
-function GroupboxMethods:AddButton(name, callback)
-    self._ItemOrder = self._ItemOrder + 1
-    local order = self._ItemOrder
-
-    local Row = makeItemRow(self._ItemList, order)
-
-    local BtnFrame = Instance.new("Frame", Row)
-    BtnFrame.Size = UDim2.new(1, 0, 1, 0)
-    BtnFrame.BackgroundColor3 = Color3.fromRGB(39,39,39)
-    BtnFrame.BorderSizePixel = 0
-
-    local bS1 = Instance.new("UIStroke", BtnFrame)
-    bS1.Thickness = 1.6; bS1.LineJoinMode = Enum.LineJoinMode.Miter
-    local bS2 = Instance.new("UIStroke", BtnFrame)
-    bS2.Color = Color3.fromRGB(64,64,64); bS2.LineJoinMode = Enum.LineJoinMode.Miter
-
-    local BtnLbl = Instance.new("TextLabel", BtnFrame)
-    BtnLbl.BackgroundTransparency = 1
-    BtnLbl.Size = UDim2.new(1,0,1,0)
-    BtnLbl.Text = name
-    BtnLbl.TextSize = 12
-    BtnLbl.TextColor3 = Color3.fromRGB(255,255,255)
-    BtnLbl.FontFace = Font.new([[rbxasset://fonts/families/Arial.json]])
-
-    local Btn = Instance.new("TextButton", BtnFrame)
-    Btn.Size = UDim2.new(1,0,1,0)
-    Btn.BackgroundTransparency = 1
-    Btn.Text = ""
-    Btn.ZIndex = 10
-    Btn.AutoButtonColor = false
-
-    Btn.MouseButton1Click:Connect(function()
-        print(name .. " Button pressed!")
-        if callback then callback() end
-    end)
-end
-
--- SLIDER
-function GroupboxMethods:AddSlider(name, min, max, default, callback)
-    self._ItemOrder = self._ItemOrder + 1
-    local order = self._ItemOrder
-    local value = default or min
-    local dragging = false
-
-    -- Label row
-    local LabelRow = makeItemRow(self._ItemList, order)
-    LabelRow.Size = UDim2.new(1, 0, 0, 14)
-
-    local NameLbl = Instance.new("TextLabel", LabelRow)
-    NameLbl.BackgroundTransparency = 1
-    NameLbl.Size = UDim2.new(0.6, 0, 1, 0)
-    NameLbl.Text = name
-    NameLbl.TextSize = 12
-    NameLbl.TextColor3 = Color3.fromRGB(255,255,255)
-    NameLbl.FontFace = Font.new([[rbxasset://fonts/families/Arial.json]])
-    NameLbl.TextXAlignment = Enum.TextXAlignment.Left
-
-    local ValLbl = Instance.new("TextLabel", LabelRow)
-    ValLbl.BackgroundTransparency = 1
-    ValLbl.Size = UDim2.new(0.4, 0, 1, 0)
-    ValLbl.Position = UDim2.new(0.6, 0, 0, 0)
-    ValLbl.Text = value .. "/" .. max
-    ValLbl.TextSize = 12
-    ValLbl.TextColor3 = Color3.fromRGB(255,255,255)
-    ValLbl.FontFace = Font.new([[rbxasset://fonts/families/Arial.json]])
-    ValLbl.TextXAlignment = Enum.TextXAlignment.Right
-
-    -- Slider row
-    self._ItemOrder = self._ItemOrder + 1
-    local SliderRow = makeItemRow(self._ItemList, self._ItemOrder)
-    SliderRow.Size = UDim2.new(1, 0, 0, 5)
-
-    local Track = Instance.new("Frame", SliderRow)
-    Track.Size = UDim2.new(1, 0, 1, 0)
-    Track.BackgroundColor3 = Color3.fromRGB(39,39,39)
-    Track.BorderSizePixel = 0
-
-    local tS1 = Instance.new("UIStroke", Track)
-    tS1.Thickness = 1.6; tS1.LineJoinMode = Enum.LineJoinMode.Miter
-    local tS2 = Instance.new("UIStroke", Track)
-    tS2.Color = Color3.fromRGB(64,64,64); tS2.LineJoinMode = Enum.LineJoinMode.Miter
-
-    local Fill = Instance.new("Frame", Track)
-    Fill.BackgroundColor3 = ACCENT_COLOR
-    Fill.BorderSizePixel = 0
-    local rel = (value - min) / (max - min)
-    Fill.Size = UDim2.new(rel, 0, 1, 0)
-
+    
+    -- Slider
+    local sliderValue = 0
+    local sliderDragging = false
+    G2L["12"] = Instance.new("Frame", G2L["9"])
+    G2L["12"]["BorderSizePixel"] = 0
+    G2L["12"]["BackgroundColor3"] = Color3.fromRGB(39, 39, 39)
+    G2L["12"]["Size"] = UDim2.new(0, 121, 0, 8)
+    G2L["12"]["Position"] = UDim2.new(0.10323, 0, 0.67568, 0)
+    G2L["12"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+    G2L["12"]["Name"] = "Slider"
+    
+    G2L["13"] = Instance.new("UIStroke", G2L["12"])
+    G2L["13"]["ZIndex"] = 0
+    G2L["13"]["Thickness"] = 1.6
+    G2L["13"]["LineJoinMode"] = Enum.LineJoinMode.Miter
+    
+    G2L["14"] = Instance.new("UIStroke", G2L["12"])
+    G2L["14"]["Color"] = Color3.fromRGB(64, 64, 64)
+    G2L["14"]["LineJoinMode"] = Enum.LineJoinMode.Miter
+    
+    -- Slider fill
+    local sliderFill = Instance.new("Frame", G2L["12"])
+    sliderFill.BorderSizePixel = 0
+    sliderFill.BackgroundColor3 = ACCENT_COLOR
+    sliderFill.Size = UDim2.new(0, 0, 1, 0)
+    sliderFill.Name = "Fill"
+    
+    G2L["15"] = Instance.new("TextLabel", G2L["12"])
+    G2L["15"]["BorderSizePixel"] = 0
+    G2L["15"]["TextSize"] = 12
+    G2L["15"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
+    G2L["15"]["FontFace"] = Font.new("rbxasset://fonts/families/Arial.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+    G2L["15"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
+    G2L["15"]["BackgroundTransparency"] = 1
+    G2L["15"]["Size"] = UDim2.new(0, 45, 0, 18)
+    G2L["15"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+    G2L["15"]["Text"] = "0/100"
+    G2L["15"]["Position"] = UDim2.new(0.62782, 0, -2.6, 0)
+    
+    G2L["16"] = Instance.new("TextLabel", G2L["12"])
+    G2L["16"]["BorderSizePixel"] = 0
+    G2L["16"]["TextSize"] = 12
+    G2L["16"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
+    G2L["16"]["FontFace"] = Font.new("rbxasset://fonts/families/Arial.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+    G2L["16"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
+    G2L["16"]["BackgroundTransparency"] = 1
+    G2L["16"]["Size"] = UDim2.new(0, 45, 0, 18)
+    G2L["16"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+    G2L["16"]["Text"] = "Slider"
+    G2L["16"]["Position"] = UDim2.new(0.25592, 0, -2.6, 0)
+    
     local function updateSlider(x)
-        local ap = Track.AbsolutePosition.X
-        local as = Track.AbsoluteSize.X
-        local r  = math.clamp((x - ap) / as, 0, 1)
-        value = math.floor(r * (max - min) + min)
-        Fill.Size = UDim2.new(r, 0, 1, 0)
-        ValLbl.Text = value .. "/" .. max
-        print(name .. " Slider: " .. value)
-        if callback then callback(value) end
+        local absPos = G2L["12"].AbsolutePosition.X
+        local absSize = G2L["12"].AbsoluteSize.X
+        local rel = math.clamp((x - absPos) / absSize, 0, 1)
+        sliderValue = math.floor(rel * 100)
+        sliderFill.Size = UDim2.new(rel, 0, 1, 0)
+        G2L["15"].Text = sliderValue .. "/100"
+        print("Slider:", sliderValue)
     end
-
-    local SliderBtn = Instance.new("TextButton", Track)
-    SliderBtn.Size = UDim2.new(1, 0, 1, 16)
-    SliderBtn.Position = UDim2.new(0, 0, 0, -8)
-    SliderBtn.BackgroundTransparency = 1
-    SliderBtn.Text = ""
-    SliderBtn.ZIndex = 10
-    SliderBtn.AutoButtonColor = false
-
-    SliderBtn.MouseButton1Down:Connect(function(x)
-        dragging = true
+    
+    local sliderBtn = Instance.new("TextButton", G2L["12"])
+    sliderBtn.Size = UDim2.new(1, 0, 1, 16)
+    sliderBtn.Position = UDim2.new(0, 0, 0, -8)
+    sliderBtn.BackgroundTransparency = 1
+    sliderBtn.Text = ""
+    sliderBtn.ZIndex = 10
+    sliderBtn.MouseButton1Down:Connect(function(x)
+        sliderDragging = true
         updateSlider(x)
     end)
+    
     UIS.InputChanged:Connect(function(input)
-        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        if sliderDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
             updateSlider(input.Position.X)
         end
     end)
+    
     UIS.InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = false
+            sliderDragging = false
         end
     end)
-
-    return {
-        GetValue = function() return value end,
-        SetValue = function(v)
-            value = math.clamp(v, min, max)
-            local r = (value - min)/(max - min)
-            Fill.Size = UDim2.new(r, 0, 1, 0)
-            ValLbl.Text = value .. "/" .. max
-            if callback then callback(value) end
-        end
-    }
-end
-
--- LABEL
-function GroupboxMethods:AddLabel(text)
-    self._ItemOrder = self._ItemOrder + 1
-    local order = self._ItemOrder
-
-    local Row = makeItemRow(self._ItemList, order)
-
-    local Lbl = Instance.new("TextLabel", Row)
-    Lbl.BackgroundTransparency = 1
-    Lbl.Size = UDim2.new(1,0,1,0)
-    Lbl.Text = text
-    Lbl.TextSize = 12
-    Lbl.TextColor3 = Color3.fromRGB(200,200,200)
-    Lbl.FontFace = Font.new([[rbxasset://fonts/families/Arial.json]])
-    Lbl.TextXAlignment = Enum.TextXAlignment.Left
-
-    return {
-        SetText = function(t) Lbl.Text = t end
-    }
-end
-
--- DROPDOWN
-function GroupboxMethods:AddDropdown(name, options, default, callback)
-    self._ItemOrder = self._ItemOrder + 1
-    local order = self._ItemOrder
-    local selected = default or "none"
-    local open = false
-
-    local ITEM_HEIGHT  = 18
-    local MAX_VISIBLE  = 3
-
-    -- Label row
-    local LabelRow = makeItemRow(self._ItemList, order)
-    LabelRow.Size = UDim2.new(1, 0, 0, 14)
-
-    local NameLbl = Instance.new("TextLabel", LabelRow)
-    NameLbl.BackgroundTransparency = 1
-    NameLbl.Size = UDim2.new(1,0,1,0)
-    NameLbl.Text = name
-    NameLbl.TextSize = 12
-    NameLbl.TextColor3 = Color3.fromRGB(255,255,255)
-    NameLbl.FontFace = Font.new([[rbxasset://fonts/families/Arial.json]])
-    NameLbl.TextXAlignment = Enum.TextXAlignment.Left
-
-    -- Dropdown row
-    self._ItemOrder = self._ItemOrder + 1
-    local DDRow = makeItemRow(self._ItemList, self._ItemOrder)
-    DDRow.Size = UDim2.new(1, 0, 0, 17)
-    DDRow.ZIndex = 20
-    DDRow.ClipsDescendants = false
-
-    local DDFrame = Instance.new("Frame", DDRow)
-    DDFrame.Size = UDim2.new(1, 0, 1, 0)
-    DDFrame.BackgroundColor3 = Color3.fromRGB(39,39,39)
-    DDFrame.BorderSizePixel = 0
-    DDFrame.ZIndex = 20
-    DDFrame.ClipsDescendants = false
-
-    local dS1 = Instance.new("UIStroke", DDFrame)
-    dS1.Thickness = 1.6; dS1.LineJoinMode = Enum.LineJoinMode.Miter
-    local dS2 = Instance.new("UIStroke", DDFrame)
-    dS2.Color = Color3.fromRGB(64,64,64); dS2.LineJoinMode = Enum.LineJoinMode.Miter
-
-    local SelLbl = Instance.new("TextLabel", DDFrame)
-    SelLbl.BackgroundTransparency = 1
-    SelLbl.Size = UDim2.new(1, -16, 1, 0)
-    SelLbl.Position = UDim2.new(0, 4, 0, 0)
-    SelLbl.Text = selected
-    SelLbl.TextSize = 12
-    SelLbl.TextColor3 = Color3.fromRGB(255,255,255)
-    SelLbl.FontFace = Font.new([[rbxasset://fonts/families/Arial.json]])
-    SelLbl.TextXAlignment = Enum.TextXAlignment.Left
-    SelLbl.ZIndex = 21
-
-    local ArrowLbl = Instance.new("TextLabel", DDFrame)
-    ArrowLbl.BackgroundTransparency = 1
-    ArrowLbl.Size = UDim2.new(0, 14, 1, 0)
-    ArrowLbl.Position = UDim2.new(1, -16, 0, 0)
-    ArrowLbl.Text = "v"
-    ArrowLbl.TextSize = 10
-    ArrowLbl.TextColor3 = Color3.fromRGB(180,180,180)
-    ArrowLbl.FontFace = Font.new([[rbxasset://fonts/families/Arial.json]])
-    ArrowLbl.ZIndex = 21
-
-    -- List container
-    local ListContainer = Instance.new("Frame", DDFrame)
-    ListContainer.Name = "DropdownList"
-    ListContainer.ZIndex = 50
-    ListContainer.BorderSizePixel = 0
-    ListContainer.BackgroundColor3 = Color3.fromRGB(39,39,39)
-    ListContainer.Size = UDim2.new(1, 0, 0, math.min(#options, MAX_VISIBLE) * ITEM_HEIGHT)
-    ListContainer.Position = UDim2.new(0, 0, 1, 2)
-    ListContainer.ClipsDescendants = true
-    ListContainer.Visible = false
-
-    local lcS = Instance.new("UIStroke", ListContainer)
-    lcS.Color = Color3.fromRGB(64,64,64); lcS.Thickness = 1.6
-    lcS.LineJoinMode = Enum.LineJoinMode.Miter; lcS.ZIndex = 51
-
-    local Scroll = Instance.new("ScrollingFrame", ListContainer)
-    Scroll.Size = UDim2.new(1,0,1,0)
-    Scroll.BackgroundTransparency = 1
-    Scroll.BorderSizePixel = 0
-    Scroll.ScrollBarThickness = 3
-    Scroll.ScrollBarImageColor3 = ACCENT_COLOR
-    Scroll.ZIndex = 52
-    Scroll.CanvasSize = UDim2.new(0,0,0,0)
-    Scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
-
-    local ScrollLayout = Instance.new("UIListLayout", Scroll)
-    ScrollLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    ScrollLayout.Padding = UDim.new(0,0)
-
+    
+    -- GroupBox2
+    G2L["17"] = Instance.new("Frame", G2L["6"])
+    G2L["17"]["BorderSizePixel"] = 0
+    G2L["17"]["BackgroundColor3"] = Color3.fromRGB(30, 30, 30)
+    G2L["17"]["Size"] = UDim2.new(0, 155, 0, 225)
+    G2L["17"]["Position"] = UDim2.new(0.52189, 0, 0.04852, 0)
+    G2L["17"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+    G2L["17"]["Name"] = "GroupBox2"
+    
+    G2L["18"] = Instance.new("Frame", G2L["17"])
+    G2L["18"]["BorderSizePixel"] = 0
+    G2L["18"]["BackgroundColor3"] = Color3.fromRGB(0, 194, 228)
+    G2L["18"]["Size"] = UDim2.new(0, 152, 0, 2)
+    G2L["18"]["Position"] = UDim2.new(0.01318, 0, 0, 0)
+    G2L["18"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+    G2L["18"]["Name"] = "GroupBox2Top"
+    
+    G2L["19"] = Instance.new("TextLabel", G2L["17"])
+    G2L["19"]["BorderSizePixel"] = 0
+    G2L["19"]["TextSize"] = 12
+    G2L["19"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
+    G2L["19"]["FontFace"] = Font.new("rbxasset://fonts/families/Arial.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+    G2L["19"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
+    G2L["19"]["BackgroundTransparency"] = 1
+    G2L["19"]["Size"] = UDim2.new(0, 86, 0, 22)
+    G2L["19"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+    G2L["19"]["Text"] = "groupbox2"
+    G2L["19"]["Name"] = "GroupBox2Text"
+    G2L["19"]["Position"] = UDim2.new(0.21862, 0, 0.01802, 0)
+    
+    G2L["1a"] = Instance.new("UIStroke", G2L["17"])
+    G2L["1a"]["ZIndex"] = 0
+    G2L["1a"]["Thickness"] = 2
+    G2L["1a"]["Color"] = Color3.fromRGB(21, 21, 21)
+    G2L["1a"]["LineJoinMode"] = Enum.LineJoinMode.Miter
+    G2L["1a"]["Name"] = "GroupBox2UIStroke"
+    
+    G2L["1b"] = Instance.new("UIStroke", G2L["17"])
+    G2L["1b"]["Color"] = Color3.fromRGB(57, 57, 57)
+    G2L["1b"]["LineJoinMode"] = Enum.LineJoinMode.Miter
+    G2L["1b"]["Name"] = "GroupBox2UIStroke2"
+    
+    -- Button
+    G2L["1c"] = Instance.new("Frame", G2L["17"])
+    G2L["1c"]["BorderSizePixel"] = 0
+    G2L["1c"]["BackgroundColor3"] = Color3.fromRGB(39, 39, 39)
+    G2L["1c"]["Size"] = UDim2.new(0, 135, 0, 17)
+    G2L["1c"]["Position"] = UDim2.new(0.05359, 0, 0.13742, 0)
+    G2L["1c"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+    G2L["1c"]["Name"] = "Button"
+    
+    G2L["1d"] = Instance.new("UIStroke", G2L["1c"])
+    G2L["1d"]["ZIndex"] = 0
+    G2L["1d"]["Thickness"] = 1.6
+    G2L["1d"]["LineJoinMode"] = Enum.LineJoinMode.Miter
+    
+    G2L["1e"] = Instance.new("UIStroke", G2L["1c"])
+    G2L["1e"]["Color"] = Color3.fromRGB(64, 64, 64)
+    G2L["1e"]["LineJoinMode"] = Enum.LineJoinMode.Miter
+    
+    G2L["1f"] = Instance.new("TextLabel", G2L["1c"])
+    G2L["1f"]["BorderSizePixel"] = 0
+    G2L["1f"]["TextSize"] = 12
+    G2L["1f"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
+    G2L["1f"]["FontFace"] = Font.new("rbxasset://fonts/families/Arial.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+    G2L["1f"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
+    G2L["1f"]["BackgroundTransparency"] = 1
+    G2L["1f"]["Size"] = UDim2.new(0, 45, 0, 18)
+    G2L["1f"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+    G2L["1f"]["Text"] = "Button"
+    G2L["1f"]["Position"] = UDim2.new(0.34444, 0, -0.00588, 0)
+    
+    local buttonBtn = Instance.new("TextButton", G2L["1c"])
+    buttonBtn.Size = UDim2.new(1, 0, 1, 0)
+    buttonBtn.BackgroundTransparency = 1
+    buttonBtn.Text = ""
+    buttonBtn.ZIndex = 10
+    buttonBtn.MouseButton1Click:Connect(function()
+        print("Button pressed!")
+    end)
+    
+    -- Label
+    G2L["20"] = Instance.new("TextLabel", G2L["17"])
+    G2L["20"]["BorderSizePixel"] = 0
+    G2L["20"]["TextSize"] = 12
+    G2L["20"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
+    G2L["20"]["FontFace"] = Font.new("rbxasset://fonts/families/Arial.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+    G2L["20"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
+    G2L["20"]["BackgroundTransparency"] = 1
+    G2L["20"]["Size"] = UDim2.new(0, 45, 0, 18)
+    G2L["20"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+    G2L["20"]["Text"] = "This is a label"
+    G2L["20"]["Name"] = "Label"
+    G2L["20"]["Position"] = UDim2.new(0.35735, 0, 0.30078, 0)
+    
+    -- Dropdown
+    local dropdownOpen = false
+    local selectedOption = "none"
+    
+    G2L["21"] = Instance.new("Frame", G2L["17"])
+    G2L["21"]["ZIndex"] = 99999999
+    G2L["21"]["BorderSizePixel"] = 0
+    G2L["21"]["BackgroundColor3"] = Color3.fromRGB(39, 39, 39)
+    G2L["21"]["Size"] = UDim2.new(0, 135, 0, 17)
+    G2L["21"]["Position"] = UDim2.new(0.05359, 0, 0.46186, 0)
+    G2L["21"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+    G2L["21"]["Name"] = "Dropdown"
+    G2L["21"]["ClipsDescendants"] = false
+    
+    G2L["22"] = Instance.new("UIStroke", G2L["21"])
+    G2L["22"]["ZIndex"] = 0
+    G2L["22"]["Thickness"] = 1.6
+    G2L["22"]["LineJoinMode"] = Enum.LineJoinMode.Miter
+    
+    G2L["23"] = Instance.new("UIStroke", G2L["21"])
+    G2L["23"]["Color"] = Color3.fromRGB(64, 64, 64)
+    G2L["23"]["LineJoinMode"] = Enum.LineJoinMode.Miter
+    
+    G2L["24"] = Instance.new("TextLabel", G2L["21"])
+    G2L["24"]["BorderSizePixel"] = 0
+    G2L["24"]["TextSize"] = 12
+    G2L["24"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255)
+    G2L["24"]["FontFace"] = Font.new("rbxasset://fonts/families/Arial.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+    G2L["24"]["TextColor3"] = Color3.fromRGB(255, 255, 255)
+    G2L["24"]["BackgroundTransparency"] = 1
+    G2L["24"]["Size"] = UDim2.new(0, 45, 0, 18)
+    G2L["24"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+    G2L["24"]["Text"] = "none"
+    G2L["24"]["Position"] = UDim2.new(0.34444, 0, -0.06235, 0)
+    G2L["24"]["ZIndex"] = 99999999
+    
+    -- DropdownSelected
+    G2L["25"] = Instance.new("Frame", G2L["21"])
+    G2L["25"]["ZIndex"] = 99999999
+    G2L["25"]["BorderSizePixel"] = 0
+    G2L["25"]["BackgroundColor3"] = Color3.fromRGB(39, 39, 39)
+    G2L["25"]["Size"] = UDim2.new(0, 135, 0, 54)
+    G2L["25"]["Position"] = UDim2.new(-0.00567, 0, 1.10892, 0)
+    G2L["25"]["BorderColor3"] = Color3.fromRGB(0, 0, 0)
+    G2L["25"]["Name"] = "DropdownSelected"
+    G2L["25"]["Visible"] = false
+    G2L["25"]["ClipsDescendants"] = true
+    
+    G2L["26"] = Instance.new("UIStroke", G2L["25"])
+    G2L["26"]["ZIndex"] = 99999999
+    G2L["26"]["Thickness"] = 1.6
+    G2L["26"]["LineJoinMode"] = Enum.LineJoinMode.Miter
+    
+    G2L["27"] = Instance.new("UIStroke", G2L["25"])
+    G2L["27"]["ZIndex"] = 99999998
+    G2L["27"]["Color"] = Color3.fromRGB(64, 64, 64)
+    G2L["27"]["LineJoinMode"] = Enum.LineJoinMode.Miter
+    
+    local scroll = Instance.new("ScrollingFrame", G2L["25"])
+    scroll.Size = UDim2.new(1, 0, 1, 0)
+    scroll.BackgroundTransparency = 1
+    scroll.BorderSizePixel = 0
+    scroll.ScrollBarThickness = 3
+    scroll.ScrollBarImageColor3 = ACCENT_COLOR
+    scroll.ZIndex = 99999999
+    scroll.CanvasSize = UDim2.new(0, 0, 0, 72)
+    
+    G2L["2b"] = Instance.new("UIListLayout", scroll)
+    G2L["2b"]["HorizontalAlignment"] = Enum.HorizontalAlignment.Center
+    G2L["2b"]["SortOrder"] = Enum.SortOrder.LayoutOrder
+    G2L["2b"]["ItemLineAlignment"] = Enum.ItemLineAlignment.Center
+    
+    local options = {"1", "2", "3", "4"}
     for i, opt in ipairs(options) do
-        local ItemBtn = Instance.new("TextButton", Scroll)
-        ItemBtn.Name = "Item_" .. opt
-        ItemBtn.Size = UDim2.new(1, 0, 0, ITEM_HEIGHT)
-        ItemBtn.BackgroundColor3 = Color3.fromRGB(39,39,39)
-        ItemBtn.BorderSizePixel = 0
-        ItemBtn.Text = opt
-        ItemBtn.TextSize = 12
-        ItemBtn.TextColor3 = Color3.fromRGB(255,255,255)
-        ItemBtn.FontFace = Font.new([[rbxasset://fonts/families/Arial.json]])
-        ItemBtn.ZIndex = 53
-        ItemBtn.LayoutOrder = i
-        ItemBtn.AutoButtonColor = false
-
-        ItemBtn.MouseEnter:Connect(function()
-            ItemBtn.BackgroundColor3 = Color3.fromRGB(50,50,50)
-        end)
-        ItemBtn.MouseLeave:Connect(function()
-            ItemBtn.BackgroundColor3 = Color3.fromRGB(39,39,39)
-        end)
-        ItemBtn.MouseButton1Click:Connect(function()
-            selected = opt
-            SelLbl.Text = opt
-            open = false
-            ArrowLbl.Text = "v"
-            ListContainer.Visible = false
-            print(name .. " Dropdown selected: " .. opt)
-            if callback then callback(opt) end
+        local optLabel = Instance.new("TextLabel", scroll)
+        optLabel.BorderSizePixel = 0
+        optLabel.TextSize = 12
+        optLabel.BackgroundColor3 = Color3.fromRGB(39, 39, 39)
+        optLabel.FontFace = Font.new("rbxasset://fonts/families/Arial.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+        optLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        optLabel.BackgroundTransparency = 1
+        optLabel.Size = UDim2.new(0, 45, 0, 18)
+        optLabel.BorderColor3 = Color3.fromRGB(0, 0, 0)
+        optLabel.Text = opt
+        optLabel.ZIndex = 99999999
+        optLabel.LayoutOrder = i
+        
+        local optBtn = Instance.new("TextButton", optLabel)
+        optBtn.Size = UDim2.new(1, 0, 1, 0)
+        optBtn.BackgroundTransparency = 1
+        optBtn.Text = ""
+        optBtn.ZIndex = 99999999
+        optBtn.MouseButton1Click:Connect(function()
+            selectedOption = opt
+            G2L["24"].Text = opt
+            dropdownOpen = false
+            G2L["25"].Visible = false
+            print("Selected:", opt)
         end)
     end
-
-    -- Toggle button
-    local DDBtn = Instance.new("TextButton", DDFrame)
-    DDBtn.Size = UDim2.new(1,0,1,0)
-    DDBtn.BackgroundTransparency = 1
-    DDBtn.Text = ""
-    DDBtn.ZIndex = 55
-    DDBtn.AutoButtonColor = false
-
-    DDBtn.MouseButton1Click:Connect(function()
-        open = not open
-        ArrowLbl.Text = open and "^" or "v"
-        ListContainer.Visible = open
-        print(name .. " Dropdown " .. (open and "opened" or "closed"))
+    
+    local ddBtn = Instance.new("TextButton", G2L["21"])
+    ddBtn.Size = UDim2.new(1, 0, 1, 0)
+    ddBtn.BackgroundTransparency = 1
+    ddBtn.Text = ""
+    ddBtn.ZIndex = 99999999
+    ddBtn.MouseButton1Click:Connect(function()
+        dropdownOpen = not dropdownOpen
+        G2L["25"].Visible = dropdownOpen
+        print("Dropdown:", dropdownOpen and "opened" or "closed")
     end)
-
-    return {
-        GetValue = function() return selected end,
-        SetValue = function(v)
-            selected = v
-            SelLbl.Text = v
-            if callback then callback(v) end
-        end
-    }
+    
+    return G2L["1"]
 end
 
 return Library

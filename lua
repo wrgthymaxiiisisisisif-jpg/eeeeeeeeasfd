@@ -1,14 +1,14 @@
-local cloneref = (cloneref or clonereference or function(instance: any)
+local cloneref = (cloneref or clonereference or function(instance)
     return instance
 end)
-local CoreGui: CoreGui = cloneref(game:GetService("CoreGui"))
-local Players: Players = cloneref(game:GetService("Players"))
-local RunService: RunService = cloneref(game:GetService("RunService"))
-local SoundService: SoundService = cloneref(game:GetService("SoundService"))
-local UserInputService: UserInputService = cloneref(game:GetService("UserInputService"))
-local TextService: TextService = cloneref(game:GetService("TextService"))
-local Teams: Teams = cloneref(game:GetService("Teams"))
-local TweenService: TweenService = cloneref(game:GetService("TweenService"))
+local CoreGui = cloneref(game:GetService("CoreGui"))
+local Players = cloneref(game:GetService("Players"))
+local RunService = cloneref(game:GetService("RunService"))
+local SoundService = cloneref(game:GetService("SoundService"))
+local UserInputService = cloneref(game:GetService("UserInputService"))
+local TextService = cloneref(game:GetService("TextService"))
+local Teams = cloneref(game:GetService("Teams"))
+local TweenService = cloneref(game:GetService("TweenService"))
 
 local getgenv = getgenv or function()
     return shared
@@ -293,18 +293,18 @@ local function WaitForEvent(Event, Timeout, Condition)
     end)
     return Bindable.Event:Wait()
 end
-local function IsClickInput(Input: InputObject, IncludeM2: boolean?)
+local function IsClickInput(Input, IncludeM2)
     return (
         Input.UserInputType == Enum.UserInputType.MouseButton1
             or IncludeM2 and Input.UserInputType == Enum.UserInputType.MouseButton2
             or Input.UserInputType == Enum.UserInputType.Touch
     ) and Input.UserInputState == Enum.UserInputState.Begin
 end
-local function IsHoverInput(Input: InputObject)
+local function IsHoverInput(Input)
     return (Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch)
         and Input.UserInputState == Enum.UserInputState.Change
 end
-local function GetTableSize(Table: { [any]: any })
+local function GetTableSize(Table)
     local Size = 0
 
     for _, _ in pairs(Table) do
@@ -313,18 +313,18 @@ local function GetTableSize(Table: { [any]: any })
 
     return Size
 end
-local function StopTween(Tween: TweenBase)
+local function StopTween(Tween)
     if not (Tween and Tween.PlaybackState == Enum.PlaybackState.Playing) then
         return
     end
 
     Tween:Cancel()
 end
-local function Trim(Text: string)
+local function Trim(Text)
     return Text:match("^%s*(.-)%s*$")
 end
 
-local function GetPlayers(ExcludeLocalPlayer: boolean?)
+local function GetPlayers(ExcludeLocalPlayer)
     local PlayerList = Players:GetPlayers()
 
     if ExcludeLocalPlayer then
@@ -400,7 +400,7 @@ function Library:UpdateDPI(Instance, Properties)
     end
 end
 
-function Library:SetDPIScale(DPIScale: number)
+function Library:SetDPIScale(DPIScale)
     Library.DPIScale = DPIScale / 100
     Library.MinSize *= Library.DPIScale
 
@@ -446,7 +446,7 @@ function Library:SetDPIScale(DPIScale: number)
     end
 end
 
-function Library:GiveSignal(Connection: RBXScriptConnection)
+function Library:GiveSignal(Connection)
     table.insert(Library.Signals, Connection)
     return Connection
 end
@@ -456,7 +456,7 @@ local FetchIcons, Icons = pcall(function()
         game:HttpGet("https://raw.githubusercontent.com/deividcomsono/lucide-roblox-direct/refs/heads/main/source.lua")
     )()
 end)
-function Library:GetIcon(IconName: string)
+function Library:GetIcon(IconName)
     if not FetchIcons then
         return
     end
@@ -467,7 +467,7 @@ function Library:GetIcon(IconName: string)
     return Icon
 end
 
-function Library:Validate(Table: { [string]: any }, Template: { [string]: any }): { [string]: any }
+function Library:Validate(Table, Template)
     if typeof(Table) ~= "table" then
         return Template
     end
@@ -484,7 +484,7 @@ function Library:Validate(Table: { [string]: any }, Template: { [string]: any })
 end
 
 --// Creator Functions \\--
-local function FillInstance(Table: { [string]: any }, Instance: GuiObject)
+local function FillInstance(Table, Instance)
     local ThemeProperties = Library.Registry[Instance] or {}
     local DPIProperties = Library.DPIRegistry[Instance] or {}
 
@@ -525,7 +525,7 @@ local function FillInstance(Table: { [string]: any }, Instance: GuiObject)
     end
 end
 
-local function New(ClassName: string, Properties: { [string]: any }): any
+local function New(ClassName, Properties)
     local Instance = Instance.new(ClassName)
 
     if Templates[ClassName] then
@@ -543,7 +543,7 @@ local function New(ClassName: string, Properties: { [string]: any }): any
 end
 
 --// Main Instances \\-
-local function ParentUI(UI: Instance)
+local function ParentUI(UI)
     pcall(protectgui, UI);
 
     if not pcall(function()
@@ -630,7 +630,7 @@ do
 end
 
 --// Lib Functions \\--
-function Library:GetBetterColor(Color: Color3, Add: number): Color3
+function Library:GetBetterColor(Color, Add)
     Add = Add * (Library.IsLightTheme and -4 or 2)
     return Color3.fromRGB(
         math.clamp(Color.R * 255 + Add, 0, 255),
@@ -639,12 +639,12 @@ function Library:GetBetterColor(Color: Color3, Add: number): Color3
     )
 end
 
-function Library:GetDarkerColor(Color: Color3): Color3
+function Library:GetDarkerColor(Color)
     local H, S, V = Color:ToHSV()
     return Color3.fromHSV(H, S, V / 2)
 end
 
-function Library:GetKeyString(KeyCode: Enum.KeyCode)
+function Library:GetKeyString(KeyCode)
     if KeyCode.EnumType == Enum.KeyCode and KeyCode.Value > 33 and KeyCode.Value < 127 then
         return string.char(KeyCode.Value)
     end
@@ -652,7 +652,7 @@ function Library:GetKeyString(KeyCode: Enum.KeyCode)
     return KeyCode.Name
 end
 
-function Library:GetTextBounds(Text: string, Font: Font, Size: number, Width: number?): (number, number)
+function Library:GetTextBounds(Text, Font, Size, Width)
     local Params = Instance.new("GetTextBoundsParams")
     Params.Text = Text
     Params.RichText = true
@@ -664,7 +664,7 @@ function Library:GetTextBounds(Text: string, Font: Font, Size: number, Width: nu
     return Bounds.X, Bounds.Y
 end
 
-function Library:MouseIsOverFrame(Frame: GuiObject, Mouse: Vector2): boolean
+function Library:MouseIsOverFrame(Frame, Mouse)
     local AbsPos, AbsSize = Frame.AbsolutePosition, Frame.AbsoluteSize
     return Mouse.X >= AbsPos.X
         and Mouse.X <= AbsPos.X + AbsSize.X
@@ -672,7 +672,7 @@ function Library:MouseIsOverFrame(Frame: GuiObject, Mouse: Vector2): boolean
         and Mouse.Y <= AbsPos.Y + AbsSize.Y
 end
 
-function Library:SafeCallback(Func: (...any) -> ...any, ...: any)
+function Library:SafeCallback(Func, ...)
     if not (Func and typeof(Func) == "function") then
         return
     end
@@ -692,12 +692,12 @@ function Library:SafeCallback(Func: (...any) -> ...any, ...: any)
     end
 end
 
-function Library:MakeDraggable(UI: GuiObject, DragFrame: GuiObject, IgnoreToggled: boolean?, IsMainWindow: boolean?)
+function Library:MakeDraggable(UI, DragFrame, IgnoreToggled, IsMainWindow)
     local StartPos
     local FramePos
     local Dragging = false
     local Changed
-    DragFrame.InputBegan:Connect(function(Input: InputObject)
+    DragFrame.InputBegan:Connect(function(Input)
         if not IsClickInput(Input) or IsMainWindow and Library.CantDragForced then
             return
         end
@@ -718,7 +718,7 @@ function Library:MakeDraggable(UI: GuiObject, DragFrame: GuiObject, IgnoreToggle
             end
         end)
     end)
-    Library:GiveSignal(UserInputService.InputChanged:Connect(function(Input: InputObject)
+    Library:GiveSignal(UserInputService.InputChanged:Connect(function(Input)
         if
             (not IgnoreToggled and not Library.Toggled)
             or (IsMainWindow and Library.CantDragForced)
@@ -741,12 +741,12 @@ function Library:MakeDraggable(UI: GuiObject, DragFrame: GuiObject, IgnoreToggle
     end))
 end
 
-function Library:MakeResizable(UI: GuiObject, DragFrame: GuiObject, Callback: () -> ()?)
+function Library:MakeResizable(UI, DragFrame, Callback)
     local StartPos
     local FrameSize
     local Dragging = false
     local Changed
-    DragFrame.InputBegan:Connect(function(Input: InputObject)
+    DragFrame.InputBegan:Connect(function(Input)
         if not IsClickInput(Input) then
             return
         end
@@ -767,7 +767,7 @@ function Library:MakeResizable(UI: GuiObject, DragFrame: GuiObject, Callback: ()
             end
         end)
     end)
-    Library:GiveSignal(UserInputService.InputChanged:Connect(function(Input: InputObject)
+    Library:GiveSignal(UserInputService.InputChanged:Connect(function(Input)
         if not UI.Visible or not (ScreenGui and ScreenGui.Parent) then
             Dragging = false
             if Changed and Changed.Connected then
@@ -793,7 +793,7 @@ function Library:MakeResizable(UI: GuiObject, DragFrame: GuiObject, Callback: ()
     end))
 end
 
-function Library:MakeCover(Holder: GuiObject, Place: string)
+function Library:MakeCover(Holder, Place)
     local Pos = Places[Place] or { 0, 0 }
     local Size = Sizes[Place] or { 1, 0.5 }
 
@@ -808,7 +808,7 @@ function Library:MakeCover(Holder: GuiObject, Place: string)
     return Cover
 end
 
-function Library:MakeLine(Frame: GuiObject, Info)
+function Library:MakeLine(Frame, Info)
     local Line = New("Frame", {
         AnchorPoint = Info.AnchorPoint or Vector2.zero,
         BackgroundColor3 = "OutlineColor",
@@ -820,7 +820,7 @@ function Library:MakeLine(Frame: GuiObject, Info)
     return Line
 end
 
-function Library:MakeOutline(Frame: GuiObject, Corner: number?, ZIndex: number?)
+function Library:MakeOutline(Frame, Corner, ZIndex)
     local Holder = New("Frame", {
         BackgroundColor3 = "Dark",
         Position = UDim2.fromOffset(-2, -2),
@@ -851,7 +851,7 @@ function Library:MakeOutline(Frame: GuiObject, Corner: number?, ZIndex: number?)
     return Holder
 end
 
-function Library:AddDraggableButton(Text: string, Func)
+function Library:AddDraggableButton(Text, Func)
     local Table = {}
 
     local Button = New("TextButton", {
@@ -877,7 +877,7 @@ function Library:AddDraggableButton(Text: string, Func)
     end)
     Library:MakeDraggable(Button, Button, true)
 
-    function Table:SetText(NewText: string)
+    function Table:SetText(NewText)
         local X, Y = Library:GetTextBounds(NewText, Library.Scheme.Font, 16)
 
         Button.Text = NewText
@@ -891,7 +891,7 @@ function Library:AddDraggableButton(Text: string, Func)
     return Table
 end
 
-function Library:AddDraggableMenu(Name: string)
+function Library:AddDraggableMenu(Name)
     local Background = Library:MakeOutline(ScreenGui, Library.CornerRadius, 10)
     Background.AutomaticSize = Enum.AutomaticSize.Y
     Background.Position = UDim2.fromOffset(6, 6)
@@ -955,11 +955,11 @@ end
 --// Context Menu \\--
 local CurrentMenu
 function Library:AddContextMenu(
-    Holder: GuiObject,
-    Size: UDim2 | () -> (),
-    Offset: { [number]: number } | () -> {},
-    List: number?,
-    ActiveCallback: (Active: boolean) -> ()?
+    Holder,
+    Size,
+    Offset,
+    List,
+    ActiveCallback
 )
     local Menu
     if List then
@@ -1095,7 +1095,7 @@ function Library:AddContextMenu(
     return Table
 end
 
-Library:GiveSignal(UserInputService.InputBegan:Connect(function(Input: InputObject)
+Library:GiveSignal(UserInputService.InputBegan:Connect(function(Input)
     if IsClickInput(Input, true) then
         local Location = Input.Position
 
@@ -1140,7 +1140,7 @@ TooltipLabel:GetPropertyChangedSignal("AbsolutePosition"):Connect(function()
 end)
 
 local CurrentHoverInstance
-function Library:AddTooltip(InfoStr: string, DisabledInfoStr: string, HoverInstance: GuiObject)
+function Library:AddTooltip(InfoStr, DisabledInfoStr, HoverInstance)
     local TooltipTable = {
         Disabled = false,
         Hovering = false,
@@ -1545,7 +1545,7 @@ do
         end)
         Picker.MouseButton2Click:Connect(MenuTable.Toggle)
 
-        Library:GiveSignal(UserInputService.InputBegan:Connect(function(Input: InputObject)
+        Library:GiveSignal(UserInputService.InputBegan:Connect(function(Input)
             if
                 KeyPicker.Mode == "Always"
                 or KeyPicker.Value == "Unknown"
@@ -1697,10 +1697,6 @@ do
         })
         New("UICorner", {
             CornerRadius = UDim.new(1, 0),
-            Parent = SatVibCursor,
-        })
-        New("UIStroke", {
-            Color = "Dark",
             Parent = SatVibCursor,
         })
 
@@ -2003,7 +1999,6 @@ do
         return Funcs[Key](...)
     end
 end
-
 local BaseGroupbox = {}
 do
     local Funcs = {}
@@ -2071,14 +2066,14 @@ do
             Parent = Container,
         })
 
-        function Label:SetVisible(Visible: boolean)
+        function Label:SetVisible(Visible)
             Label.Visible = Visible
 
             TextLabel.Visible = Label.Visible
             Groupbox:Resize()
         end
 
-        function Label:SetText(Text: string)
+        function Label:SetText(Text)
             Label.Text = Text
             TextLabel.Text = Text
 
@@ -2330,7 +2325,7 @@ do
                     or "MainColor"
             end
 
-            function SubButton:SetDisabled(Disabled: boolean)
+            function SubButton:SetDisabled(Disabled)
                 SubButton.Disabled = Disabled
 
                 if SubButton.TooltipTable then
@@ -2341,14 +2336,14 @@ do
                 SubButton:UpdateColors()
             end
 
-            function SubButton:SetVisible(Visible: boolean)
+            function SubButton:SetVisible(Visible)
                 SubButton.Visible = Visible
 
                 SubButton.Base.Visible = SubButton.Visible
                 Groupbox:Resize()
             end
 
-            function SubButton:SetText(Text: string)
+            function SubButton:SetText(Text)
                 SubButton.Text = Text
                 SubButton.Base.Text = Text
             end
@@ -2390,7 +2385,7 @@ do
             Library.Registry[Button.Base].BackgroundColor3 = Button.Disabled and "BackgroundColor" or "MainColor"
         end
 
-        function Button:SetDisabled(Disabled: boolean)
+        function Button:SetDisabled(Disabled)
             Button.Disabled = Disabled
 
             if Button.TooltipTable then
@@ -2401,14 +2396,14 @@ do
             Button:UpdateColors()
         end
 
-        function Button:SetVisible(Visible: boolean)
+        function Button:SetVisible(Visible)
             Button.Visible = Visible
 
             Holder.Visible = Button.Visible
             Groupbox:Resize()
         end
 
-        function Button:SetText(Text: string)
+        function Button:SetText(Text)
             Button.Text = Text
             Button.Base.Text = Text
         end
@@ -2505,7 +2500,8 @@ do
             Color = "OutlineColor",
             Parent = Checkbox,
         })
-                local CheckImage = New("ImageLabel", {
+
+        local CheckImage = New("ImageLabel", {
             Image = CheckIcon and CheckIcon.Url or "",
             ImageColor3 = "FontColor",
             ImageRectOffset = CheckIcon and CheckIcon.ImageRectOffset or Vector2.zero,
@@ -2571,7 +2567,7 @@ do
             Library:SafeCallback(Toggle.Changed, Toggle.Value)
         end
 
-        function Toggle:SetDisabled(Disabled: boolean)
+        function Toggle:SetDisabled(Disabled)
             Toggle.Disabled = Disabled
 
             if Toggle.TooltipTable then
@@ -2588,14 +2584,14 @@ do
             Toggle:Display()
         end
 
-        function Toggle:SetVisible(Visible: boolean)
+        function Toggle:SetVisible(Visible)
             Toggle.Visible = Visible
 
             Button.Visible = Toggle.Visible
             Groupbox:Resize()
         end
 
-        function Toggle:SetText(Text: string)
+        function Toggle:SetText(Text)
             Toggle.Text = Text
             Label.Text = Text
         end
@@ -2790,7 +2786,7 @@ do
             Library:SafeCallback(Toggle.Changed, Toggle.Value)
         end
 
-        function Toggle:SetDisabled(Disabled: boolean)
+        function Toggle:SetDisabled(Disabled)
             Toggle.Disabled = Disabled
 
             if Toggle.TooltipTable then
@@ -2807,14 +2803,14 @@ do
             Toggle:Display()
         end
 
-        function Toggle:SetVisible(Visible: boolean)
+        function Toggle:SetVisible(Visible)
             Toggle.Visible = Visible
 
             Button.Visible = Toggle.Visible
             Groupbox:Resize()
         end
 
-        function Toggle:SetText(Text: string)
+        function Toggle:SetText(Text)
             Toggle.Text = Text
             Label.Text = Text
         end
@@ -2958,7 +2954,7 @@ do
             end
         end
 
-        function Input:SetDisabled(Disabled: boolean)
+        function Input:SetDisabled(Disabled)
             Input.Disabled = Disabled
 
             if Input.TooltipTable then
@@ -2970,14 +2966,14 @@ do
             Input:UpdateColors()
         end
 
-        function Input:SetVisible(Visible: boolean)
+        function Input:SetVisible(Visible)
             Input.Visible = Visible
 
             Holder.Visible = Input.Visible
             Groupbox:Resize()
         end
 
-        function Input:SetText(Text: string)
+        function Input:SetText(Text)
             Input.Text = Text
             Label.Text = Text
         end
@@ -3078,12 +3074,6 @@ do
             ZIndex = 2,
             Parent = Bar,
         })
-        New("UIStroke", {
-            ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual,
-            Color = "Dark",
-            LineJoinMode = Enum.LineJoinMode.Miter,
-            Parent = DisplayLabel,
-        })
 
         local Fill = New("Frame", {
             BackgroundColor3 = "AccentColor",
@@ -3181,7 +3171,7 @@ do
             Library:SafeCallback(Slider.Changed, Slider.Value)
         end
 
-        function Slider:SetDisabled(Disabled: boolean)
+        function Slider:SetDisabled(Disabled)
             Slider.Disabled = Disabled
 
             if Slider.TooltipTable then
@@ -3192,14 +3182,14 @@ do
             Slider:UpdateColors()
         end
 
-        function Slider:SetVisible(Visible: boolean)
+        function Slider:SetVisible(Visible)
             Slider.Visible = Visible
 
             Holder.Visible = Slider.Visible
             Groupbox:Resize()
         end
 
-        function Slider:SetText(Text: string)
+        function Slider:SetText(Text)
             Slider.Text = Text
             if SliderLabel then
                 SliderLabel.Text = Text
@@ -3208,12 +3198,12 @@ do
             Slider:Display()
         end
 
-        function Slider:SetPrefix(Prefix: string)
+        function Slider:SetPrefix(Prefix)
             Slider.Prefix = Prefix
             Slider:Display()
         end
 
-        function Slider:SetSuffix(Suffix: string)
+        function Slider:SetSuffix(Suffix)
             Slider.Suffix = Suffix
             Slider:Display()
         end
@@ -3376,7 +3366,7 @@ do
                 return { 0.5, Display.AbsoluteSize.Y + 1.5 }
             end,
             2,
-            function(Active: boolean)
+            function(Active)
                 Display.TextTransparency = (Active and SearchBox) and 1 or 0
                 ArrowImage.ImageTransparency = Active and 0 or 0.5
                 ArrowImage.Rotation = Active and 180 or 0
@@ -3620,7 +3610,7 @@ do
             Dropdown:BuildDropdownList()
         end
 
-        function Dropdown:SetDisabled(Disabled: boolean)
+        function Dropdown:SetDisabled(Disabled)
             Dropdown.Disabled = Disabled
 
             if Dropdown.TooltipTable then
@@ -3632,14 +3622,14 @@ do
             Dropdown:UpdateColors()
         end
 
-        function Dropdown:SetVisible(Visible: boolean)
+        function Dropdown:SetVisible(Visible)
             Dropdown.Visible = Visible
 
             Holder.Visible = Dropdown.Visible
             Groupbox:Resize()
         end
 
-        function Dropdown:SetText(Text: string)
+        function Dropdown:SetText(Text)
             Dropdown.Text = Text
             Holder.Size = UDim2.new(1, 0, 0, (Text and 39 or 21) * Library.DPIScale)
 
@@ -3723,7 +3713,7 @@ function Library:SetFont(FontFace)
     Library:UpdateColorsUsingRegistry()
 end
 
-function Library:SetNotifySide(Side: string)
+function Library:SetNotifySide(Side)
     Library.NotifySide = Side
 
     if Side:lower() == "left" then
@@ -3902,7 +3892,7 @@ function Library:Notify(...)
         Size = UDim2.fromScale(1, 1),
         Parent = TimerBar,
     })
-
+    
     if typeof(Data.Time) == "Instance" then
         TimerFill.Size = UDim2.fromScale(0, 1)
     end
@@ -3916,7 +3906,7 @@ function Library:Notify(...)
     end
 
     Library.Notifications[FakeBackground] = Data
-
+    
     FakeBackground.Visible = true
     TweenService:Create(Background, Library.NotifyTweenInfo, {
         Position = UDim2.fromOffset(-2, -2),
@@ -3948,7 +3938,7 @@ end
 
 function Library:CreateWindow(WindowInfo)
     WindowInfo = Library:Validate(WindowInfo, Templates.Window)
-    local ViewportSize: Vector2 = workspace.CurrentCamera.ViewportSize
+    local ViewportSize = workspace.CurrentCamera.ViewportSize
     if RunService:IsStudio() and ViewportSize.X <= 5 and ViewportSize.Y <= 5 then
         repeat
             ViewportSize = workspace.CurrentCamera.ViewportSize
@@ -4234,8 +4224,8 @@ function Library:CreateWindow(WindowInfo)
     --// Window Table \\--
     local Window = {}
 
-    function Window:AddTab(Name: string, Icon)
-        local TabButton: TextButton
+    function Window:AddTab(Name, Icon)
+        local TabButton
         local TabLabel
         local TabIcon
 
@@ -4399,12 +4389,6 @@ function Library:CreateWindow(WindowInfo)
                 TextWrapped = true,
                 Parent = WarningBox,
             })
-            New("UIStroke", {
-                ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual,
-                Color = "Dark",
-                LineJoinMode = Enum.LineJoinMode.Miter,
-                Parent = WarningText,
-            })
         end
 
         --// Tab Table \\--
@@ -4467,7 +4451,7 @@ function Library:CreateWindow(WindowInfo)
             end
         end
 
-        function Tab:Resize(ResizeWarningBox: boolean?)
+        function Tab:Resize(ResizeWarningBox)
             if ResizeWarningBox then
                 local _, Y = Library:GetTextBounds(
                     WarningText.Text,
@@ -4798,7 +4782,7 @@ function Library:CreateWindow(WindowInfo)
     end
 
     function Window:AddKeyTab(Name)
-        local TabButton: TextButton
+        local TabButton
         local TabLabel
         local TabIcon
 
@@ -5005,7 +4989,7 @@ function Library:CreateWindow(WindowInfo)
         return Tab
     end
 
-    function Library:Toggle(Value: boolean?)
+    function Library:Toggle(Value)
         if typeof(Value) == "boolean" then
             Library.Toggled = Value
         else
@@ -5217,7 +5201,7 @@ function Library:CreateWindow(WindowInfo)
         LastTab = Library.ActiveTab
     end)
 
-    Library:GiveSignal(UserInputService.InputBegan:Connect(function(Input: InputObject)
+    Library:GiveSignal(UserInputService.InputBegan:Connect(function(Input)
         if UserInputService:GetFocusedTextBox() then
             return
         end
